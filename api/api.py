@@ -1,11 +1,10 @@
 from openai import OpenAI
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
 from flask import Flask, request, jsonify
 import logging
 import os
 from dotenv import load_dotenv
 
+from ChatBotRAG.utils.openaiUtils import handle_query
 from ChatBotRAG.utils.utils import retrieve_relevant_document, is_within_scope
 
 # Load environment variables
@@ -21,24 +20,6 @@ app = Flask(__name__)
 # Set up logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
-
-
-# Function to handle user queries using RAG
-def handle_query(user_query):
-    relevant_doc = retrieve_relevant_document(user_query)
-    if not relevant_doc:
-        return "Sorry, I couldn't find any relevant information."
-
-    completion = client.chat.completions.create(
-        model="gpt-4",
-        messages=[
-            {"role": "system",
-             "content": "You are a technical support assistant for a software product. Only answer questions related to software installation, updates, troubleshooting, and licensing."},
-            {"role": "user", "content": f"Question: {user_query}\nContext: {relevant_doc['answer']}"},
-        ],
-        max_tokens=150,
-    )
-    return completion.choices[0].message.content
 
 
 # REST API endpoint for chat
@@ -57,7 +38,7 @@ def chat():
             bot_response = "Sorry, I can only assist with software installation, updates, troubleshooting, and licensing."
             logger.info("Out-of-scope query detected.")
         else:
-            bot_response = handle_query(user_query)
+            bot_response = handle_query(client, user_query)
     except Exception as e:
         logger.error(f"Error processing message: {e}")
         bot_response = "Sorry, I encountered an error while processing your request."

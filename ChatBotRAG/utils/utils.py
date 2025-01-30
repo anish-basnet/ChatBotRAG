@@ -1,4 +1,3 @@
-from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from ChatBotRAG.knowledge_base import knowledge_base, get_document_vectors_with_vectorizer
 from typing import Dict

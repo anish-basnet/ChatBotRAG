@@ -19,6 +19,10 @@ def handle_query(client: OpenAI, user_query: str) -> str:
     # Step 1: Retrieve the most relevant document
     relevant_doc = retrieve_relevant_document(user_query)
 
+    if not relevant_doc:
+        return "Sorry, I couldn't find any relevant information."
+
+
     # Step 2: Use OpenAI GPT to generate a response based on the retrieved document
     completion = client.chat.completions.create(
         model="gpt-4",
